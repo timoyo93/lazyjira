@@ -1,4 +1,4 @@
-.PHONY: build build-version build-demo lint lint-fix lint-docs vet clean check check-demo release preview e2e e2e-gen e2e-update nix-deps
+.PHONY: build build-version build-demo lint lint-fix lint-docs vet test clean check check-demo release preview e2e e2e-gen e2e-update nix-deps
 
 build:
 	go build -o lazyjira ./cmd/lazyjira
@@ -10,10 +10,10 @@ build-version:
 	go build -ldflags "-s -w -X main.version=$$(git rev-parse --short HEAD)" -o lazyjira ./cmd/lazyjira
 
 lint:
-	golangci-lint run ./...
+	go tool golangci-lint run ./...
 
 lint-fix:
-	golangci-lint run --fix ./...
+	go tool golangci-lint run --fix ./...
 
 lint-docs:
 	npx --yes markdownlint-cli README.md CHANGELOG.md docs/*.md --disable MD001 MD013 MD024 MD033 MD040 MD041 MD060
@@ -21,10 +21,13 @@ lint-docs:
 vet:
 	go vet ./...
 
+test:
+	go test -race ./...
+
 clean:
 	rm -f lazyjira
 
-check: lint vet build
+check: lint vet build test
 
 release:
 	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=2.7.0" && exit 1)
@@ -36,7 +39,7 @@ release:
 	@echo "Tagged v$(VERSION). Push with: git push && git push --tags"
 
 check-demo:
-	golangci-lint run --build-tags demo ./...
+	go tool golangci-lint run --build-tags demo ./...
 	go vet -tags demo ./...
 	go build -tags demo -o lazyjira ./cmd/lazyjira
 

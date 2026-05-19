@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   check:
     name: check (make check)
@@ -18,15 +21,19 @@ jobs:
           go-version-file: go.mod
 
       - name: make lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: v2.11.3
+        run: make lint
 
       - name: make vet
         run: make vet
 
       - name: make build
         run: make build
+
+      - name: make test
+        run: make test
+
+      - name: make check-demo
+        run: make check-demo
 
   nix:
     name: nix (make nix-deps)
