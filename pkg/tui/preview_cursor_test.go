@@ -223,4 +223,3 @@ func TestPreviewFollowsCursor_UnknownKey_FallsBackToContext(t *testing.T) {
 		t.Errorf("DetailView.IssueKey = %q, want context fallback %q", got, mainKey)
 	}
 }
-

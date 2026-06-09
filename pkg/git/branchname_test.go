@@ -127,4 +127,3 @@ func TestSanitizeSummary(t *testing.T) {
 		})
 	}
 }
-

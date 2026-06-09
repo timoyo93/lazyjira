@@ -11,11 +11,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/textfuel/lazyjira/v2/pkg/tui/navstack"
 	"github.com/textfuel/lazyjira/v2/pkg/config"
 	"github.com/textfuel/lazyjira/v2/pkg/git"
 	"github.com/textfuel/lazyjira/v2/pkg/jira"
 	"github.com/textfuel/lazyjira/v2/pkg/tui/components"
+	"github.com/textfuel/lazyjira/v2/pkg/tui/navstack"
 	"github.com/textfuel/lazyjira/v2/pkg/tui/theme"
 	"github.com/textfuel/lazyjira/v2/pkg/tui/views"
 )
@@ -199,8 +199,8 @@ type App struct {
 	// fetches. Bumped on every ChildrenRequestMsg; responses with stale
 	// epoch are dropped.
 	childrenEpoch int
-	pendingWalk pendingWalk
-	createCtx  createCtx
+	pendingWalk   pendingWalk
+	createCtx     createCtx
 
 	gitRepoPath    string
 	gitBranch      string
@@ -350,7 +350,7 @@ func NewAppWithAuth(cfg *config.Config, client jira.ClientInterface, authMethod 
 		issueCache:      make(map[string]*jira.Issue),
 		childrenCache:   make(map[string][]jira.Issue),
 		createMetaCache: make(map[string][]jira.CreateMetaField),
-		converter: BuiltinConverter{},
+		converter:       BuiltinConverter{},
 	}
 	// cfg.Converter is validated at config-load time; "" and "builtin"
 	// both fall through to the BuiltinConverter set above.

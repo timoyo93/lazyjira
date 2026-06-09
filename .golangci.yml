@@ -69,3 +69,7 @@ linters:
       # modernize stringsseq: keep strings.Split for clarity in view code
       - linters: [modernize]
         text: "stringsseq"
+
+formatters:
+  enable:
+    - gofmt

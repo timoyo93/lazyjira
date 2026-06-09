@@ -1,4 +1,4 @@
-.PHONY: build build-version build-demo lint lint-fix lint-docs vet test clean check check-demo release preview e2e e2e-gen e2e-update nix-deps
+.PHONY: build build-version build-demo lint lint-fix lint-docs vet test clean check check-demo tidy fix release preview e2e e2e-gen e2e-update nix-deps
 
 build:
 	go build -o lazyjira ./cmd/lazyjira
@@ -13,6 +13,7 @@ lint:
 	go tool golangci-lint run ./...
 
 lint-fix:
+	go tool golangci-lint fmt
 	go tool golangci-lint run --fix ./...
 
 lint-docs:
@@ -28,6 +29,11 @@ clean:
 	rm -f lazyjira
 
 check: lint vet build test
+
+tidy:
+	go mod tidy
+
+fix: tidy lint-fix nix-deps
 
 release:
 	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=2.7.0" && exit 1)

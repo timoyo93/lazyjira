@@ -132,7 +132,6 @@ func (f *CreateForm) FilterBarView() string { return RenderFilterBarInput(&f.fil
 // SetDescRenderer sets an optional rich renderer for description preview
 func (f *CreateForm) SetDescRenderer(r DescRenderFunc) { f.descRenderer = r }
 
-
 func (f *CreateForm) ShowForm(fields []CreateFormField, issueTypeName, projectKey string) {
 	f.visible = true
 	f.issueTypeName = issueTypeName

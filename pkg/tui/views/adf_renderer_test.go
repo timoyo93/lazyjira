@@ -19,7 +19,7 @@ func miniADF() map[string]any {
 		"version": 1,
 		"content": []any{
 			map[string]any{
-				"type": "heading",
+				"type":  "heading",
 				"attrs": map[string]any{"level": 2.0},
 				"content": []any{
 					map[string]any{"type": "text", "text": "Heading"},
@@ -39,7 +39,7 @@ func miniADF() map[string]any {
 				},
 			},
 			map[string]any{
-				"type": "codeBlock",
+				"type":  "codeBlock",
 				"attrs": map[string]any{"language": "go"},
 				"content": []any{
 					map[string]any{"type": "text", "text": "x := 1"},

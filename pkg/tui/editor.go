@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/shlex"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/shlex"
 )
 
 // editorFinishedMsg is sent when $EDITOR exits.

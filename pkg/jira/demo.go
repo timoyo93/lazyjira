@@ -36,10 +36,10 @@ func NewDemoClient() *DemoClient {
 	return d
 }
 
-func (d *DemoClient) SetOnRequest(fn func(RequestLog)) { d.onRequest = fn }
-func (d *DemoClient) SetCustomFields(_ []string)       {}
+func (d *DemoClient) SetOnRequest(fn func(RequestLog))       { d.onRequest = fn }
+func (d *DemoClient) SetCustomFields(_ []string)             {}
 func (d *DemoClient) DiscoverFields(_ context.Context) error { return nil }
-func (d *DemoClient) SprintFieldID() string            { return "sprint" }
+func (d *DemoClient) SprintFieldID() string                  { return "sprint" }
 
 func (d *DemoClient) GetJQLAutocompleteData(_ context.Context) ([]AutocompleteField, error) {
 	return []AutocompleteField{
