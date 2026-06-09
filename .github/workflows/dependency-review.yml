@@ -3,6 +3,9 @@ name: dependency-review
 on:
   pull_request:
     branches: [main]
+    paths:
+      - go.mod
+      - go.sum
 
 permissions:
   contents: read

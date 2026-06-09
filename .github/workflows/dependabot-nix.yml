@@ -18,16 +18,12 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-
       - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: regenerate gomod2nix.toml
-        run: nix run github:nix-community/gomod2nix
+        run: nix develop -c gomod2nix generate
 
       - name: commit if changed
         run: |
