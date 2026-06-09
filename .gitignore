@@ -21,6 +21,9 @@ config.yml
 # Nix
 /result
 
+# Coverage
+cover.out
+
 # Generated tapes (source .tape.sh via e2e/tape.sh)
 e2e/tapes/*.tape
 

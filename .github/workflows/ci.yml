@@ -29,8 +29,16 @@ jobs:
       - name: make build
         run: make build
 
-      - name: make test
-        run: make test
+      - name: test with coverage
+        run: go test -race ./... -coverprofile=cover.out -covermode=atomic -coverpkg=./...
+
+      - name: coverage summary
+        run: |
+          pct=$(go tool cover -func=cover.out | awk '/^total:/{gsub(/%/,"",$3); print $3}')
+          {
+            echo "## Coverage: ${pct}%"
+            echo "![coverage](https://img.shields.io/badge/coverage-${pct}%25-blue)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: make check-demo
         run: make check-demo
