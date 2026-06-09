@@ -7,6 +7,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Optional Glamour renderer for ADF previews in the detail view and the create form. Set `renderer: glamour` in config.yml to route descriptions and comments through the adf-converter display module and Glamour for richer styling of headings, lists, code blocks and colored text spans. The builtin renderer stays the default. `rendererStyle` (auto, dark, light, notty) selects the Glamour theme. Auto detects the terminal background via lipgloss and can be set explicitly when detection fails under tmux or ssh (#80)
+- `--debug <file>` flag that writes structured debug logs to a file for troubleshooting editor launches and other actions (#82)
+
+### Fixed
+
+- Editors configured with arguments in `$EDITOR` or `$VISUAL` now launch correctly. The value is split shell-style into a binary and its arguments, so `EDITOR="code --wait"` or `EDITOR="nvim --cmd 'set ft=md'"` work instead of trying to exec a binary named after the whole string (#82)
+
 ## [2.15.0] - 2026-05-21
 
 ### Added
