@@ -7,6 +7,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- Full unit-test suite across the whole repository, raising coverage from about 50% to about 80% (stdlib `testing`, table-driven cases, race detector). New test linters are enforced in `.golangci.yml` (thelper, tparallel, usetesting, testableexamples, paralleltest) (#92)
+- CI runs the test suite with coverage and publishes the total percent to the workflow run summary
+
+### Fixed
+
+- Data race in the author color cache. The shared color map was written without a lock, so rendering many colored author names at once (comments and history) could hit a concurrent map write and crash. Lookups are now guarded by a read-write mutex with double-checked locking (#92)
+
 ## [2.16.0] - 2026-06-09
 
 ### Added
