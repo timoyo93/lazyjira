@@ -13,22 +13,20 @@ import (
 	"github.com/textfuel/lazyjira/v2/pkg/tui/views"
 )
 
-// TestChildrenRequestMsg_Cloud_FiresGetChildren pins the happy path: a
-// ChildrenRequestMsg on a Cloud app dispatches GetChildren with the right
-// key and routes the loaded children into InfoPanel.
 func TestChildrenRequestMsg_Cloud_FiresGetChildren(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	want := []jira.Issue{{Key: "C-1", Summary: "first"}, {Key: "C-2", Summary: "second"}}
 	fake.GetChildrenFunc = func(_ context.Context, _ string) ([]jira.Issue, error) {
 		return want, nil
 	}
 
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
 
-	_, cmd := a.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
+	_, cmd := app.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
 	if cmd == nil {
 		t.Fatal("expected fetch Cmd, got nil")
 	}
@@ -41,26 +39,24 @@ func TestChildrenRequestMsg_Cloud_FiresGetChildren(t *testing.T) {
 		t.Errorf("GetChildren ParentKey = %q, want EPIC-1", got)
 	}
 
-	_, _ = a.Update(loadedMsg)
+	_, _ = app.Update(loadedMsg)
 
-	got := a.infoPanel.Children()
+	got := app.infoPanel.Children()
 	if len(got) != 2 || got[0].Key != "C-1" || got[1].Key != "C-2" {
 		t.Errorf("InfoPanel children = %+v, want %+v", got, want)
 	}
 }
 
-// TestChildrenRequestMsg_ServerDC_NoCall pins the Server/DC fast-path: the
-// app shortcircuits before touching the client when isCloud=false.
 func TestChildrenRequestMsg_ServerDC_NoCall(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	// No GetChildrenFunc — any call would t.Fatalf via fake.fatal.
 
-	a := newAppWithFake(t, fake)
-	a.isCloud = false
-	a.infoPanel.SetCloud(false)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = false
+	app.infoPanel.SetCloud(false)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
 
-	_, cmd := a.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
+	_, cmd := app.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
 	if cmd != nil {
 		t.Errorf("Server/DC: expected nil cmd, got non-nil")
 	}
@@ -69,64 +65,61 @@ func TestChildrenRequestMsg_ServerDC_NoCall(t *testing.T) {
 	}
 }
 
-// TestChildrenLoadedMsg_StaleEpochDropped pins the stale-drop invariant: a
-// childrenLoadedMsg with a stale epoch (because a newer ChildrenRequestMsg
-// has bumped the counter) is ignored.
 func TestChildrenLoadedMsg_StaleEpochDropped(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
 
-	a.childrenEpoch = 5
+	app.childrenEpoch = 5
 
 	stale := childrenLoadedMsg{
 		key:    "EPIC-1",
 		issues: []jira.Issue{{Key: "STALE-CHILD"}},
 		epoch:  3,
 	}
-	_, _ = a.Update(stale)
+	_, _ = app.Update(stale)
 
-	if got := a.infoPanel.Children(); got != nil {
+	if got := app.infoPanel.Children(); got != nil {
 		t.Errorf("stale response: expected nil children, got %+v", got)
 	}
 }
 
-// TestChildrenLoadedMsg_FetchError_SetsStatusPanelError pins the error path:
-// a non-nil err lands as a StatusPanel error message and propagates to
-// InfoPanel for the error row.
 func TestChildrenLoadedMsg_FetchError_SetsStatusPanelError(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
 
-	a.childrenEpoch = 1
-	_, _ = a.Update(childrenLoadedMsg{
+	app.childrenEpoch = 1
+	_, _ = app.Update(childrenLoadedMsg{
 		key:   "EPIC-1",
 		err:   errors.New("network down"),
 		epoch: 1,
 	})
 
-	if a.statusPanel.ErrorMessage() == "" {
+	if app.statusPanel.ErrorMessage() == "" {
 		t.Error("StatusPanel error should be set on fetch failure")
 	}
 }
 
 func TestIssueSelectedMsg_OnSubTab_DispatchesChildrenRequest(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
 
-	a.infoPanel.SetIssue(&jira.Issue{Key: "OLD"})
-	for a.infoPanel.ActiveTab() != views.InfoTabSubtasks {
-		a.infoPanel.NextTab()
+	app.infoPanel.SetIssue(&jira.Issue{Key: "OLD"})
+	for app.infoPanel.ActiveTab() != views.InfoTabSubtasks {
+		app.infoPanel.NextTab()
 	}
 
-	_, cmd := a.Update(views.IssueSelectedMsg{Issue: &jira.Issue{Key: "EPIC-1"}})
+	_, cmd := app.Update(views.IssueSelectedMsg{Issue: &jira.Issue{Key: "EPIC-1"}})
 	if cmd == nil {
 		t.Fatal("expected batch cmd, got nil")
 	}
@@ -137,63 +130,65 @@ func TestIssueSelectedMsg_OnSubTab_DispatchesChildrenRequest(t *testing.T) {
 }
 
 func TestIssueSelectedMsg_OnFieldsTab_NoChildrenRequest(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "OLD"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "OLD"})
 
-	_, cmd := a.Update(views.IssueSelectedMsg{Issue: &jira.Issue{Key: "EPIC-1"}})
+	_, cmd := app.Update(views.IssueSelectedMsg{Issue: &jira.Issue{Key: "EPIC-1"}})
 	if batchContainsChildrenRequest(cmd, "EPIC-1") {
 		t.Error("Fields tab should not dispatch ChildrenRequestMsg")
 	}
 }
 
 func TestChildrenRequestMsg_CacheHit_NoClientCall(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	// No GetChildrenFunc — any call would t.Fatalf via fake.fatal.
 
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
-	a.childrenCache["EPIC-1"] = []jira.Issue{{Key: "C-1", Summary: "cached"}}
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app.childrenCache["EPIC-1"] = []jira.Issue{{Key: "C-1", Summary: "cached"}}
 
-	_, cmd := a.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
+	_, cmd := app.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
 	if cmd != nil {
 		t.Errorf("cache hit: expected nil cmd, got non-nil")
 	}
 	if len(fake.GetChildrenCalls) != 0 {
 		t.Errorf("cache hit: expected 0 GetChildren calls, got %d", len(fake.GetChildrenCalls))
 	}
-	got := a.infoPanel.Children()
+	got := app.infoPanel.Children()
 	if len(got) != 1 || got[0].Key != "C-1" {
 		t.Errorf("cache hit: InfoPanel children = %+v, want one C-1", got)
 	}
 }
 
 func TestChildrenRequestMsg_CacheMiss_PopulatesCacheOnLoad(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	want := []jira.Issue{{Key: "C-1"}, {Key: "C-2"}}
 	fake.GetChildrenFunc = func(_ context.Context, _ string) ([]jira.Issue, error) {
 		return want, nil
 	}
 
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
 
-	_, cmd := a.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
+	_, cmd := app.Update(views.ChildrenRequestMsg{Key: "EPIC-1"})
 	if cmd == nil {
 		t.Fatal("cache miss: expected fetch cmd, got nil")
 	}
-	if _, ok := a.childrenCache["EPIC-1"]; ok {
+	if _, ok := app.childrenCache["EPIC-1"]; ok {
 		t.Error("cache miss: cache should still be empty before response")
 	}
-	_, _ = a.Update(cmd())
+	_, _ = app.Update(cmd())
 
-	cached, ok := a.childrenCache["EPIC-1"]
+	cached, ok := app.childrenCache["EPIC-1"]
 	if !ok {
 		t.Fatal("after load: expected cache entry for EPIC-1")
 	}
@@ -203,6 +198,7 @@ func TestChildrenRequestMsg_CacheMiss_PopulatesCacheOnLoad(t *testing.T) {
 }
 
 func TestChildrenLoadedMsg_PrefetchesChildDetails(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	var seenJQL string
 	fake.SearchIssuesFunc = func(_ context.Context, jql string, _, _ int) (*jira.SearchResult, error) {
@@ -210,13 +206,13 @@ func TestChildrenLoadedMsg_PrefetchesChildDetails(t *testing.T) {
 		return &jira.SearchResult{}, nil
 	}
 
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
-	a.childrenEpoch = 1
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app.childrenEpoch = 1
 
-	_, cmd := a.Update(childrenLoadedMsg{
+	_, cmd := app.Update(childrenLoadedMsg{
 		key:    "EPIC-1",
 		issues: []jira.Issue{{Key: "C-1"}, {Key: "C-2"}},
 		epoch:  1,
@@ -235,16 +231,17 @@ func TestChildrenLoadedMsg_PrefetchesChildDetails(t *testing.T) {
 }
 
 func TestChildrenLoadedMsg_PrefetchSkipsAlreadyCached(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
-	a.issueCache["C-1"] = &jira.Issue{Key: "C-1"}
-	a.issueCache["C-2"] = &jira.Issue{Key: "C-2"}
-	a.childrenEpoch = 1
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "EPIC-1"})
+	app.issueCache["C-1"] = &jira.Issue{Key: "C-1"}
+	app.issueCache["C-2"] = &jira.Issue{Key: "C-2"}
+	app.childrenEpoch = 1
 
-	_, cmd := a.Update(childrenLoadedMsg{
+	_, cmd := app.Update(childrenLoadedMsg{
 		key:    "EPIC-1",
 		issues: []jira.Issue{{Key: "C-1"}, {Key: "C-2"}},
 		epoch:  1,
@@ -255,38 +252,39 @@ func TestChildrenLoadedMsg_PrefetchSkipsAlreadyCached(t *testing.T) {
 }
 
 func TestActRefresh_ClearsChildrenCacheForPreviewKey(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	fake.GetIssueFunc = func(_ context.Context, _ string) (*jira.Issue, error) {
 		return &jira.Issue{Key: "EPIC-1"}, nil
 	}
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.previewKey = "EPIC-1"
-	a.childrenCache["EPIC-1"] = []jira.Issue{{Key: "STALE"}}
-	a.childrenCache["OTHER"] = []jira.Issue{{Key: "OTHER-CHILD"}}
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.previewKey = "EPIC-1"
+	app.childrenCache["EPIC-1"] = []jira.Issue{{Key: "STALE"}}
+	app.childrenCache["OTHER"] = []jira.Issue{{Key: "OTHER-CHILD"}}
 
-	_, _, _ = a.handleIssueAction(ActRefresh)
+	_, _, _ = app.handleIssueAction(ActRefresh)
 
-	if _, ok := a.childrenCache["EPIC-1"]; ok {
+	if _, ok := app.childrenCache["EPIC-1"]; ok {
 		t.Error("refresh: expected EPIC-1 entry to be cleared")
 	}
-	if _, ok := a.childrenCache["OTHER"]; !ok {
+	if _, ok := app.childrenCache["OTHER"]; !ok {
 		t.Error("refresh: unrelated cache entry must survive")
 	}
 }
 
-// ActRefresh on a Cloud issue refetches children.
 func TestActRefresh_OnCloud_RefetchesChildren(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	stubFullIssueFetch(fake, &jira.Issue{Key: "REFRESH-1"})
-	a := newAppWithFake(t, fake)
-	a.isCloud = true
-	a.infoPanel.SetCloud(true)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "REFRESH-1"})
-	a.previewKey = "REFRESH-1"
-	a.childrenCache["REFRESH-1"] = []jira.Issue{{Key: "STALE"}}
+	app := newAppWithFake(t, fake)
+	app.isCloud = true
+	app.infoPanel.SetCloud(true)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "REFRESH-1"})
+	app.previewKey = "REFRESH-1"
+	app.childrenCache["REFRESH-1"] = []jira.Issue{{Key: "STALE"}}
 
-	_, cmd, handled := a.handleIssueAction(ActRefresh)
+	_, cmd, handled := app.handleIssueAction(ActRefresh)
 	if !handled {
 		t.Fatal("ActRefresh was not handled")
 	}
@@ -295,17 +293,17 @@ func TestActRefresh_OnCloud_RefetchesChildren(t *testing.T) {
 	}
 }
 
-// ActRefresh on a Server/DC issue does not refetch children.
 func TestActRefresh_OnServerDC_NoChildrenRequest(t *testing.T) {
+	t.Parallel()
 	fake := &jiratest.FakeClient{T: t}
 	stubFullIssueFetch(fake, &jira.Issue{Key: "REFRESH-2"})
-	a := newAppWithFake(t, fake)
-	a.isCloud = false
-	a.infoPanel.SetCloud(false)
-	a.infoPanel.SetIssue(&jira.Issue{Key: "REFRESH-2"})
-	a.previewKey = "REFRESH-2"
+	app := newAppWithFake(t, fake)
+	app.isCloud = false
+	app.infoPanel.SetCloud(false)
+	app.infoPanel.SetIssue(&jira.Issue{Key: "REFRESH-2"})
+	app.previewKey = "REFRESH-2"
 
-	_, cmd, handled := a.handleIssueAction(ActRefresh)
+	_, cmd, handled := app.handleIssueAction(ActRefresh)
 	if !handled {
 		t.Fatal("ActRefresh was not handled")
 	}

@@ -7,6 +7,7 @@ import (
 )
 
 func TestModal_ShowAndSelect(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 	items := []ModalItem{
@@ -20,11 +21,9 @@ func TestModal_ShowAndSelect(t *testing.T) {
 		t.Fatal("modal should be visible after Show")
 	}
 
-	// Navigate down.
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
 
-	// Select with enter.
 	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
 	if m.IsVisible() {
@@ -44,6 +43,7 @@ func TestModal_ShowAndSelect(t *testing.T) {
 }
 
 func TestModal_Cancel(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 	m.Show("Pick", []ModalItem{{ID: "1", Label: "One"}})
@@ -63,6 +63,7 @@ func TestModal_Cancel(t *testing.T) {
 }
 
 func TestModal_SkipsSeparators(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 	items := []ModalItem{
@@ -72,7 +73,6 @@ func TestModal_SkipsSeparators(t *testing.T) {
 	}
 	m.Show("Pick", items)
 
-	// Cursor should skip separator and land on "First".
 	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
 	msg := cmd()
@@ -83,17 +83,16 @@ func TestModal_SkipsSeparators(t *testing.T) {
 }
 
 func TestModal_InterceptWhenVisible(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 
-	// Not visible — should not intercept.
 	key := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}}
 	_, ok := m.Intercept(key)
 	if ok {
 		t.Error("hidden modal should not intercept")
 	}
 
-	// Visible — should intercept.
 	m.Show("Pick", []ModalItem{{ID: "1", Label: "One"}})
 	_, ok = m.Intercept(key)
 	if !ok {
@@ -102,6 +101,7 @@ func TestModal_InterceptWhenVisible(t *testing.T) {
 }
 
 func TestModal_SearchFilter(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 	m.Show("Pick", []ModalItem{
@@ -110,19 +110,16 @@ func TestModal_SearchFilter(t *testing.T) {
 		{ID: "3", Label: "Avocado"},
 	})
 
-	// Activate search.
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'/'}})
 	if !m.IsSearching() {
 		t.Fatal("search should be active after /")
 	}
 
-	// Type "av".
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}})
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'v'}})
 
-	// Confirm search, then select.
-	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})    // confirm search
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter}) // select
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
 	msg := cmd()
 	sel := msg.(ModalSelectedMsg)
@@ -132,6 +129,7 @@ func TestModal_SearchFilter(t *testing.T) {
 }
 
 func TestModal_Checklist(t *testing.T) {
+	t.Parallel()
 	m := NewModal()
 	m.SetSize(80, 24)
 	items := []ModalItem{
@@ -145,13 +143,10 @@ func TestModal_Checklist(t *testing.T) {
 		t.Fatal("should be in checklist mode")
 	}
 
-	// Toggle first item with space.
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeySpace})
-	// Move down and toggle second.
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
 	m, _ = m.Update(tea.KeyMsg{Type: tea.KeySpace})
 
-	// Confirm with enter.
 	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
 	msg := cmd()

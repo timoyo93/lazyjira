@@ -7,6 +7,7 @@ import (
 )
 
 func TestNavStack_NewStack_IsEmpty(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	if got := s.Depth(); got != 0 {
 		t.Fatalf("Depth() = %d, want 0", got)
@@ -14,6 +15,7 @@ func TestNavStack_NewStack_IsEmpty(t *testing.T) {
 }
 
 func TestNavStack_Pop_OnEmpty_ReturnsZeroFrame(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	got := s.Pop()
 	if !isZeroFrame(got) {
@@ -25,6 +27,7 @@ func TestNavStack_Pop_OnEmpty_ReturnsZeroFrame(t *testing.T) {
 }
 
 func TestNavStack_Peek_OnEmpty_ReturnsZeroFrame(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	got := s.Peek()
 	if !isZeroFrame(got) {
@@ -36,6 +39,7 @@ func TestNavStack_Peek_OnEmpty_ReturnsZeroFrame(t *testing.T) {
 }
 
 func TestNavStack_Push_IncreasesDepth(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	s.Push(makeFrame("FOO-1", 0, SourceFromList))
 	if s.Depth() != 1 {
@@ -48,6 +52,7 @@ func TestNavStack_Push_IncreasesDepth(t *testing.T) {
 }
 
 func TestNavStack_Peek_ReturnsTop(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	s.Push(makeFrame("A", 1, SourceFromList))
 	s.Push(makeFrame("B", 2, SourceFromList))
@@ -61,6 +66,7 @@ func TestNavStack_Peek_ReturnsTop(t *testing.T) {
 }
 
 func TestNavStack_Pop_ReturnsLastPushedFrame(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	s.Push(makeFrame("A", 0, SourceFromList))
 	s.Push(makeFrame("B", 5, SourceFromList))
@@ -77,6 +83,7 @@ func TestNavStack_Pop_ReturnsLastPushedFrame(t *testing.T) {
 }
 
 func TestNavStack_Pop_MultipleTimes_UntilEmpty(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	s.Push(makeFrame("A", 0, SourceFromList))
 	s.Push(makeFrame("B", 0, SourceFromList))
@@ -91,16 +98,8 @@ func TestNavStack_Pop_MultipleTimes_UntilEmpty(t *testing.T) {
 	}
 }
 
-func TestNavStack_Push_DifferentParentKeys_Appends(t *testing.T) {
-	s := NewNavStack()
-	s.Push(makeFrame("FOO-1", 0, SourceFromList))
-	s.Push(makeFrame("FOO-2", 0, SourceFromList))
-	if s.Depth() != 2 {
-		t.Fatalf("Depth after two different pushes = %d, want 2", s.Depth())
-	}
-}
-
 func TestNavStack_Clear_EmptiesStack(t *testing.T) {
+	t.Parallel()
 	s := NewNavStack()
 	s.Push(makeFrame("A", 0, SourceFromList))
 	s.Push(makeFrame("B", 0, SourceFromList))
@@ -113,9 +112,6 @@ func TestNavStack_Clear_EmptiesStack(t *testing.T) {
 	}
 }
 
-// testFocusIssues is a dummy non-zero FocusPanel value used in test fixtures.
-// The semantic mapping lives in the tui package; for NavStack tests any
-// non-zero int suffices.
 const testFocusIssues FocusPanel = 1
 
 func makeFrame(parentKey string, selectedIdx int, source Source) NavFrame {

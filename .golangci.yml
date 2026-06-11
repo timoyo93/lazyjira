@@ -32,6 +32,12 @@ linters:
     - modernize
     - copyloopvar
     - fatcontext
+    # Tests
+    - thelper
+    - tparallel
+    - usetesting
+    - testableexamples
+    - paralleltest
 
   settings:
     exhaustive:
@@ -69,6 +75,12 @@ linters:
       # modernize stringsseq: keep strings.Split for clarity in view code
       - linters: [modernize]
         text: "stringsseq"
+      # paralleltest: theme tests mutate the global theme singleton and must run serially
+      - linters: [paralleltest]
+        path: pkg/tui/theme/theme_test.go
+      # paralleltest: exec-seam test swaps the package-level command runner and must run serially
+      - linters: [paralleltest]
+        path: pkg/tui/navigation_exec_test.go
 
 formatters:
   enable:

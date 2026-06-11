@@ -4,9 +4,12 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/textfuel/lazyjira/v2/pkg/internal/testkit"
 )
 
 func TestTruncateMiddle(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    string
@@ -27,6 +30,7 @@ func TestTruncateMiddle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := TruncateMiddle(tt.input, tt.maxWidth)
 
 			if tt.want != "" && got != tt.want {
@@ -53,6 +57,7 @@ func TestTruncateMiddle(t *testing.T) {
 }
 
 func TestTruncateEnd(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    string
@@ -65,11 +70,58 @@ func TestTruncateEnd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := TruncateEnd(tt.input, tt.maxWidth)
 			w := lipgloss.Width(got)
 			if w > tt.maxWidth {
 				t.Errorf("got %q (width %d), exceeds max %d", got, w, tt.maxWidth)
 			}
+		})
+	}
+}
+
+func TestTruncate(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name   string
+		input  string
+		maxLen int
+		want   string
+	}{
+		{"non positive max returns input", "abcdef", 0, "abcdef"},
+		{"shorter than max unchanged", "abc", 5, "abc"},
+		{"equal to max unchanged", "abc", 3, "abc"},
+		{"longer than max gets ellipsis", "abcdef", 4, "abc…"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			testkit.AssertEqual(t, "Truncate", Truncate(tt.input, tt.maxLen), tt.want)
+		})
+	}
+}
+
+func TestPanelDimensions(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name             string
+		width            int
+		height           int
+		wantContentWidth int
+		wantInnerHeight  int
+	}{
+		{"typical panel", 40, 20, 38, 18},
+		{"narrow floors width at ten", 5, 5, 10, 3},
+		{"short floors height at one", 12, 1, 10, 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			contentWidth, innerHeight := PanelDimensions(tt.width, tt.height)
+			testkit.AssertEqual(t, "contentWidth", contentWidth, tt.wantContentWidth)
+			testkit.AssertEqual(t, "innerHeight", innerHeight, tt.wantInnerHeight)
 		})
 	}
 }

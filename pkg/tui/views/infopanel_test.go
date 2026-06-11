@@ -9,7 +9,6 @@ import (
 	"github.com/textfuel/lazyjira/v2/pkg/tui/components"
 )
 
-// navDownResolver is a minimal NavResolver that maps "j" to NavDown.
 func navDownResolver(key string) components.NavAction {
 	if key == "j" {
 		return components.NavDown
@@ -28,10 +27,8 @@ func pressJ() tea.KeyMsg {
 	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")}
 }
 
-// TestInfoPanel_SubTab_CursorMove_DispatchesPreviewRequestMsg verifies that
-// pressing a nav key while in the Sub tab emits PreviewRequestMsg with
-// the sub-issue key now under the cursor.
 func TestInfoPanel_SubTab_CursorMove_DispatchesPreviewRequestMsg(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issue := &jira.Issue{
@@ -47,7 +44,6 @@ func TestInfoPanel_SubTab_CursorMove_DispatchesPreviewRequestMsg(t *testing.T) {
 		p.NextTab()
 	}
 
-	// Cursor starts at 0 (SUB-1). Press "j" to move to SUB-2.
 	_, cmd := p.Update(pressJ())
 	if cmd == nil {
 		t.Fatal("expected non-nil tea.Cmd after cursor move in Sub tab, got nil")
@@ -63,9 +59,8 @@ func TestInfoPanel_SubTab_CursorMove_DispatchesPreviewRequestMsg(t *testing.T) {
 	}
 }
 
-// TestInfoPanel_LnkTab_CursorMove_OutwardLink verifies that a cursor move in
-// the Lnk tab emits PreviewRequestMsg with the outward link key.
 func TestInfoPanel_LnkTab_CursorMove_OutwardLink(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issue := &jira.Issue{
@@ -87,7 +82,6 @@ func TestInfoPanel_LnkTab_CursorMove_OutwardLink(t *testing.T) {
 		p.NextTab()
 	}
 
-	// Cursor starts at 0 (OUT-1). Press "j" to move to OUT-2.
 	_, cmd := p.Update(pressJ())
 	if cmd == nil {
 		t.Fatal("expected non-nil tea.Cmd after cursor move in Lnk tab, got nil")
@@ -103,9 +97,8 @@ func TestInfoPanel_LnkTab_CursorMove_OutwardLink(t *testing.T) {
 	}
 }
 
-// TestInfoPanel_LnkTab_CursorMove_InwardLink verifies that a cursor move to an
-// inward link emits the inward issue's key.
 func TestInfoPanel_LnkTab_CursorMove_InwardLink(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issue := &jira.Issue{
@@ -124,7 +117,6 @@ func TestInfoPanel_LnkTab_CursorMove_InwardLink(t *testing.T) {
 		p.NextTab()
 	}
 
-	// Two items: OUT-1 (index 0), IN-1 (index 1). Cursor at 0, press "j".
 	_, cmd := p.Update(pressJ())
 	if cmd == nil {
 		t.Fatal("expected non-nil tea.Cmd after cursor move in Lnk tab (inward), got nil")
@@ -141,6 +133,7 @@ func TestInfoPanel_LnkTab_CursorMove_InwardLink(t *testing.T) {
 }
 
 func TestInfoPanel_SetIssue_PreservesActiveTab(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issueA := &jira.Issue{
@@ -181,6 +174,7 @@ func TestInfoPanel_SetIssue_PreservesActiveTab(t *testing.T) {
 }
 
 func TestInfoPanel_SetIssue_SameKey_PreservesCursor(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issue := &jira.Issue{
@@ -219,9 +213,8 @@ func TestInfoPanel_SetIssue_SameKey_PreservesCursor(t *testing.T) {
 	}
 }
 
-// TestInfoPanel_FieldsTab_CursorMove_NoPreviewRequestMsg verifies that cursor
-// movement in the Fields tab does NOT dispatch PreviewRequestMsg.
 func TestInfoPanel_FieldsTab_CursorMove_NoPreviewRequestMsg(t *testing.T) {
+	t.Parallel()
 	p := makeInfoPanelFocused()
 
 	issue := &jira.Issue{

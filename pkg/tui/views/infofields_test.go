@@ -17,6 +17,7 @@ func findField(fields []InfoField, id string) (InfoField, bool) {
 }
 
 func TestParentField_Present(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key: "PROJ-2",
 		Parent: &jira.Issue{
@@ -42,6 +43,7 @@ func TestParentField_Present(t *testing.T) {
 }
 
 func TestParentField_AbsentWhenNil(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{Key: "PROJ-2"}
 
 	fields := buildInfoFields(issue, nil)
@@ -51,6 +53,7 @@ func TestParentField_AbsentWhenNil(t *testing.T) {
 }
 
 func TestParentField_NoneForSubtaskWithoutParent(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:       "PROJ-2",
 		IssueType: &jira.IssueType{Name: "Sub-task", Subtask: true},
@@ -66,6 +69,7 @@ func TestParentField_NoneForSubtaskWithoutParent(t *testing.T) {
 }
 
 func TestParentField_NoneForStandardWithoutParent(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:       "PROJ-2",
 		IssueType: &jira.IssueType{Name: "Story", HierarchyLevel: 0},
@@ -81,6 +85,7 @@ func TestParentField_NoneForStandardWithoutParent(t *testing.T) {
 }
 
 func TestParentField_HiddenForEpicWithoutParent(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:       "PROJ-2",
 		IssueType: &jira.IssueType{Name: "Epic", HierarchyLevel: 1},
@@ -92,6 +97,7 @@ func TestParentField_HiddenForEpicWithoutParent(t *testing.T) {
 }
 
 func TestParentField_SetReplacesIssue(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:    "PROJ-2",
 		Parent: &jira.Issue{Key: "PROJ-1", Summary: "epic"},
@@ -105,6 +111,7 @@ func TestParentField_SetReplacesIssue(t *testing.T) {
 }
 
 func TestParentField_SetNilUnsets(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:    "PROJ-2",
 		Parent: &jira.Issue{Key: "PROJ-1", Summary: "epic"},
@@ -118,6 +125,7 @@ func TestParentField_SetNilUnsets(t *testing.T) {
 }
 
 func TestEditValueForField_ParentReturnsKeyOnly(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:    "PROJ-2",
 		Parent: &jira.Issue{Key: "PROJ-1", Summary: "epic summary"},
@@ -129,6 +137,7 @@ func TestEditValueForField_ParentReturnsKeyOnly(t *testing.T) {
 }
 
 func TestEditValueForField_ParentNilReturnsEmpty(t *testing.T) {
+	t.Parallel()
 	issue := &jira.Issue{Key: "PROJ-2"}
 	got := EditValueForField(issue, "parent", "")
 	if got != "" {
@@ -137,9 +146,7 @@ func TestEditValueForField_ParentNilReturnsEmpty(t *testing.T) {
 }
 
 func TestEditValueForField_FallbackToDisplay(t *testing.T) {
-	// Fields without an editValue callback (e.g. a hypothetical text custom
-	// field or any built-in that uses display = edit) fall through to the
-	// generic display-string filter, which only strips None/Unknown sentinels.
+	t.Parallel()
 	issue := &jira.Issue{Key: "PROJ-2"}
 	if got := EditValueForField(issue, "summary", "current summary"); got != "current summary" {
 		t.Errorf("fallback display: got %q, want %q", got, "current summary")
@@ -150,7 +157,7 @@ func TestEditValueForField_FallbackToDisplay(t *testing.T) {
 }
 
 func TestParentField_KeyOnlyDisplay(t *testing.T) {
-	// Optimistic update may leave Summary empty until re-fetch completes.
+	t.Parallel()
 	issue := &jira.Issue{
 		Key:    "PROJ-2",
 		Parent: &jira.Issue{Key: "PROJ-1"},
@@ -166,13 +173,13 @@ func TestParentField_KeyOnlyDisplay(t *testing.T) {
 }
 
 func TestParentField_LongSummaryTruncated(t *testing.T) {
+	t.Parallel()
 	longSummary := strings.Repeat("x", 200)
 	issue := &jira.Issue{
 		Key:    "PROJ-2",
 		Parent: &jira.Issue{Key: "PROJ-1", Summary: longSummary},
 	}
 
-	// Render with a narrow width so the value cannot fit.
 	styled, plain := renderInfoRowPairs(issue, nil, nil, 30)
 	_ = styled
 

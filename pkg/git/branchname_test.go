@@ -6,6 +6,7 @@ import (
 )
 
 func TestGenerateBranchName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		data BranchTemplateData
@@ -53,9 +54,24 @@ func TestGenerateBranchName(t *testing.T) {
 			want: "Story/PROJ-10/PROJ-42-add-feature",
 		},
 		{
-			// GenerateBranchName does not transliterate by itself; ASCII
-			// reduction is a per-field caller responsibility. Non-ASCII
-			// in raw fields survives.
+			name: "unparseable template falls back to default",
+			data: BranchTemplateData{
+				Key:     "PROJ-9",
+				Summary: "fix-crash",
+			},
+			tmpl: "{{.Unclosed",
+			want: "PROJ-9-fix-crash",
+		},
+		{
+			name: "template referencing unknown field falls back to default",
+			data: BranchTemplateData{
+				Key:     "PROJ-9",
+				Summary: "fix-crash",
+			},
+			tmpl: "{{.DoesNotExist}}/{{.Key}}",
+			want: "PROJ-9-fix-crash",
+		},
+		{
 			name: "non-ASCII in raw fields survives",
 			data: BranchTemplateData{
 				Key:     "PROJ-1",
@@ -69,6 +85,7 @@ func TestGenerateBranchName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := GenerateBranchName(tt.data, tt.tmpl)
 			if got != tt.want {
 				t.Errorf("GenerateBranchName() = %q, want %q", got, tt.want)
@@ -78,6 +95,7 @@ func TestGenerateBranchName(t *testing.T) {
 }
 
 func TestSanitize(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		input string
@@ -94,6 +112,7 @@ func TestSanitize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := Sanitize(tt.input)
 			if got != tt.want {
 				t.Errorf("Sanitize(%q) = %q, want %q", tt.input, got, tt.want)
@@ -103,6 +122,7 @@ func TestSanitize(t *testing.T) {
 }
 
 func TestSanitizeSummary(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name      string
 		input     string
@@ -120,9 +140,37 @@ func TestSanitizeSummary(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := SanitizeSummary(tt.input, tt.asciiOnly)
 			if got != tt.want {
 				t.Errorf("SanitizeSummary(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractIssueKey(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"key inside feature branch", "feature/PROJ-123-foo", "PROJ-123"},
+		{"lowercase is upcased", "proj-7-lower", "PROJ-7"},
+		{"first key wins", "abc-12-then-DEF-34", "ABC-12"},
+		{"bare key", "PLAT-3", "PLAT-3"},
+		{"no key returns empty", "no-key-here", ""},
+		{"main is skipped", "main", ""},
+		{"develop is skipped case insensitive", "DEVELOP", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := ExtractIssueKey(tt.input); got != tt.want {
+				t.Errorf("ExtractIssueKey(%q) = %q, want %q", tt.input, got, tt.want)
 			}
 		})
 	}

@@ -10,9 +10,6 @@ var ansiRE = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
 func stripANSI(s string) string { return ansiRE.ReplaceAllString(s, "") }
 
-// miniADF is a small but representative ADF document covering a paragraph
-// with a mark, a heading, and a code block. Both renderers must produce
-// non-empty output for it.
 func miniADF() map[string]any {
 	return map[string]any{
 		"type":    "doc",
@@ -50,6 +47,7 @@ func miniADF() map[string]any {
 }
 
 func TestADFRenderers(t *testing.T) {
+	t.Parallel()
 	cases := []struct {
 		name     string
 		renderer ADFRenderer
@@ -60,6 +58,7 @@ func TestADFRenderers(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			lines := tc.renderer.Render(miniADF(), 60)
 			if len(lines) == 0 {
 				t.Fatalf("%s renderer returned no lines", tc.name)

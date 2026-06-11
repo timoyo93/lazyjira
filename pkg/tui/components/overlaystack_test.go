@@ -6,7 +6,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// fakeOverlay is a minimal OverlayPanel for testing.
 type fakeOverlay struct {
 	visible     bool
 	intercepted bool
@@ -29,6 +28,7 @@ func (f *fakeOverlay) Intercept(msg tea.Msg) (tea.Cmd, bool) {
 }
 
 func TestOverlayStack_InterceptRoutesToFirstVisible(t *testing.T) {
+	t.Parallel()
 	a := &fakeOverlay{visible: false}
 	b := &fakeOverlay{visible: true}
 	c := &fakeOverlay{visible: true}
@@ -52,6 +52,7 @@ func TestOverlayStack_InterceptRoutesToFirstVisible(t *testing.T) {
 }
 
 func TestOverlayStack_InterceptPassesThroughWhenNoneVisible(t *testing.T) {
+	t.Parallel()
 	a := &fakeOverlay{visible: false}
 	b := &fakeOverlay{visible: false}
 	stack := OverlayStack{a, b}
@@ -65,6 +66,7 @@ func TestOverlayStack_InterceptPassesThroughWhenNoneVisible(t *testing.T) {
 }
 
 func TestOverlayStack_RenderAllVisible(t *testing.T) {
+	t.Parallel()
 	a := &fakeOverlay{visible: false}
 	b := &fakeOverlay{visible: true}
 	c := &fakeOverlay{visible: true}
@@ -87,6 +89,7 @@ func TestOverlayStack_RenderAllVisible(t *testing.T) {
 }
 
 func TestOverlayStack_RenderPassesThroughWhenNoneVisible(t *testing.T) {
+	t.Parallel()
 	a := &fakeOverlay{visible: false}
 	stack := OverlayStack{a}
 
@@ -98,6 +101,7 @@ func TestOverlayStack_RenderPassesThroughWhenNoneVisible(t *testing.T) {
 }
 
 func TestOverlayStack_SetSizePropagates(t *testing.T) {
+	t.Parallel()
 	a := &fakeOverlay{}
 	b := &fakeOverlay{}
 	stack := OverlayStack{a, b}
