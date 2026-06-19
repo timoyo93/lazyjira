@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.18.0] - 2026-06-19
+
 ### Added
 
 - Color themes with optional auto-detection. `gui.theme` selects a bundled palette: the original `default` ANSI 16 look, or the Catppuccin presets `catppuccin-latte` (light), `catppuccin-frappe`, `catppuccin-macchiato` and `catppuccin-mocha` (dark). `theme: auto` inspects the terminal background at startup and picks `catppuccin-mocha` or `catppuccin-latte` to match. Omitting the key or leaving it empty keeps the legacy ANSI 16 palette, so existing configs are unchanged. An unknown name is an error, and hex-based presets need a truecolor terminal (#88)
@@ -451,7 +453,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Cross-platform: macOS, Linux, Windows
 - Homebrew install via tap
 
-[Unreleased]: https://github.com/textfuel/lazyjira/compare/v2.17.0...HEAD
+[Unreleased]: https://github.com/textfuel/lazyjira/compare/v2.18.0...HEAD
+[2.18.0]: https://github.com/textfuel/lazyjira/compare/v2.17.0...v2.18.0
 [2.17.0]: https://github.com/textfuel/lazyjira/compare/v2.16.1...v2.17.0
 [2.16.1]: https://github.com/textfuel/lazyjira/compare/v2.16.0...v2.16.1
 [2.16.0]: https://github.com/textfuel/lazyjira/compare/v2.15.0...v2.16.0
