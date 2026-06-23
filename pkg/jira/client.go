@@ -647,8 +647,9 @@ func (c *Client) getCreateMetaServer(ctx context.Context, projectKey, issueTypeI
 			} `json:"issuetypes"`
 		} `json:"projects"`
 	}
-	path := fmt.Sprintf("/issue/createmeta?projectKeys=%s&issuetypeIds=%s&expand=projects.issuetypes.fields",
-		url.QueryEscape(projectKey), url.QueryEscape(issueTypeID))
+
+	path := "/issue/createmeta/" + url.PathEscape(projectKey) + "/issuetypes/" + url.PathEscape(issueTypeID)
+
 	err := c.do(ctx, http.MethodGet, path, nil, &raw)
 	if err != nil {
 		return nil, fmt.Errorf("get create meta: %w", err)

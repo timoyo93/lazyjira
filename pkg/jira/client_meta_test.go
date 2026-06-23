@@ -238,8 +238,7 @@ func TestClient_GetCreateMeta_ServerParsesNestedFields(t *testing.T) {
 		t.Fatalf("GetCreateMeta: %v", err)
 	}
 
-	testkit.AssertEqual(t, "path", recorded.Path, "/rest/api/2/issue/createmeta")
-	testkit.AssertEqual(t, "projectKeys query", recorded.Query.Get("projectKeys"), "OPS")
+	testkit.AssertEqual(t, "path", recorded.Path, "/rest/api/2/issue/createmeta/OPS/issuetypes/10002")
 	if len(fields) != 1 {
 		t.Fatalf("len(fields) = %d, want 1", len(fields))
 	}
